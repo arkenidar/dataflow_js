@@ -1,0 +1,1 @@
+a way of processing data which uses simple primitives
