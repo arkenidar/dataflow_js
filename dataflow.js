@@ -41,10 +41,59 @@ function circuit(in_a, in_b){
 	return memory[2];
 
 }
-console.log(circuit(0, 0));
-console.log(circuit(0, 1));
-console.log(circuit(1, 0));
-console.log(circuit(1, 1));
+
+function xor_circuit(in_a, in_b){
+	var memory_array=[];
+	for(var i=0; i<10; i++) memory_array.push(0);
+
+	memory_array[0]=in_a;
+	memory_array[1]=in_b;
+	
+	var mapping={};
+	mapping.a=[0, 'in_a'];
+	mapping.b=[1, 'in_b'];
+	mapping.c=[2, 'a', 'b'];
+	mapping.d=[3, 'a', 'c'];
+	mapping.e=[4, 'b', 'c'];
+	mapping.q=[5, 'd', 'e'];
+
+	var update_list={};
+	update_list.in_a=['c', 'd', 'q'];
+	update_list.in_b=['c', 'e', 'q'];
+
+	function update(item){
+		var size = mapping[item].length;
+		var value;
+		if(size==3){
+			value=nand_operation(
+				update(mapping[item][1]),
+				update(mapping[item][2])
+			);
+		}else{
+			value=memory_array[mapping[item][0]];
+		}
+		memory_array[mapping[item][0]]=value;
+		return value;
+	}
+
+	function update_from_list(list){
+		for(var i=0; i<list.length; i++){
+			var current_update=list[i];
+			update(current_update);
+		}
+	}
+
+	update_from_list(update_list.in_a);
+	update_from_list(update_list.in_b);
+	
+	return memory_array[mapping.q[0]];
+}
+
+
+console.log(xor_circuit(0, 0));
+console.log(xor_circuit(0, 1));
+console.log(xor_circuit(1, 0));
+console.log(xor_circuit(1, 1));
 
 function view(var_name, var_value=''){
 	if([].indexOf(var_name)!=-1){
