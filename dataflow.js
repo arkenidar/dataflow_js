@@ -42,7 +42,7 @@ function circuit(in_a, in_b){
 
 }
 
-function xor_circuit(in_a, in_b){
+function xor_circuit_with_feedback(in_a, in_b){
 	var memory_array=[];
 	for(var i=0; i<10; i++) memory_array.push(0);
 
@@ -82,18 +82,31 @@ function xor_circuit(in_a, in_b){
 			update(current_update);
 		}
 	}
-
+	
 	update_from_list(update_list.in_a);
 	update_from_list(update_list.in_b);
-	
-	return memory_array[mapping.q[0]];
+	while(true){
+		
+		var q = memory_array[mapping.q[0]];
+		console.log(q);
+		
+		in_b = q;
+		
+		//memory_array[0]=in_a;
+		//update_from_list(update_list.in_a);
+		memory_array[1]=in_b;
+		update_from_list(update_list.in_b);
+	}
+	//return q;
 }
 
-
+/*
 console.log(xor_circuit(0, 0));
 console.log(xor_circuit(0, 1));
 console.log(xor_circuit(1, 0));
 console.log(xor_circuit(1, 1));
+*/
+console.log(xor_circuit_with_feedback(1, 1));
 
 function view(var_name, var_value=''){
 	if([].indexOf(var_name)!=-1){
