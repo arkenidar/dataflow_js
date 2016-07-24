@@ -1,14 +1,15 @@
 // dataflow_js (reactive dataflow nand operation queue)
 // a way of processing data which uses simple primitives
 function nand_operation(a, b){
-  return !(a&&b);
+  var c = !(a&&b);
+  return c;
 }
 
 memory=[false, false, false];
 operations=[[1], [0,2], []];
 queue=[0];
 
-log('queue');
+view('queue');
 while(true){
   // get source from queue
   source=queue.shift();
@@ -16,12 +17,12 @@ while(true){
 
   // get destination
   destinations=operations[source];
-  log('destinations');
+  view('destinations');
   
-  destinations.forEach(destination => { // for each destination
-    log('destination', destination);
+  destinations.forEach(function(destination) { // for each destination
+    view('destination', destination);
 
-    log('memory');
+    view('memory');
     destination_before=memory[destination];
     // operation from source to destination
     memory[destination]=nand_operation(memory[destination], memory[source]);
@@ -30,12 +31,12 @@ while(true){
     if(destination_after!=destination_before) // mutation event
       // add destination to queue (as new source) on mutation event
       queue.push(destination);
-  })
-  log('queue');
+  });
+  view('queue');
 }
-log('memory');
+view('memory');
 
-function log(var_name, var_value=''){
+function view(var_name, var_value=''){
   if(['queue'].indexOf(var_name)!=-1){
     console.log(var_name+': '+
       (var_value===''?global[var_name]:var_value)
