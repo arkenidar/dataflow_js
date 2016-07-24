@@ -5,8 +5,11 @@ function nand_operation(a, b){
   return c;
 }
 
+function circuit(in_a, in_b){
+
 memory=[false, false, false];
-operations=[[1], [0,2], []];
+memory[0]=in_a; memory[1]=in_b;
+operations=[[1], [2], []];
 queue=[0];
 
 view('queue');
@@ -35,6 +38,13 @@ while(true){
   view('queue');
 }
 view('memory');
+return memory[2];
+
+}
+console.log(circuit(false, false));
+console.log(circuit(false, true));
+console.log(circuit(true, false));
+console.log(circuit(true, true));
 
 function view(var_name, var_value=''){
   if(['queue'].indexOf(var_name)!=-1){
