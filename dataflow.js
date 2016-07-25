@@ -29,8 +29,26 @@ function xor_circuit(in_a, in_b){
 		return nands_by_source[source];
 	}
 	//queue=[0];
-	process_queue([0]);
-	process_queue([1]);
+	//process_queue([0]);
+	//process_queue([1]);
+	var gate_q = [
+	['q', [0] ], // queue
+	['q', [1] ], // queue
+	['o', [5] ], // out
+	];
+	
+	processes = gate_q;
+	
+	processes.forEach(function(process){
+		var command = process[0];
+		var params = process[1];
+		if(command=='q')
+			process_queue(params);
+		else if(command=='o')
+			params.forEach(function(address){
+				console.log(memory[address]);
+			});
+	});
 	
 	function process_queue(queue){
 	
@@ -70,8 +88,8 @@ function xor_circuit(in_a, in_b){
 	view('memory');
 	}
 	
-	
-	return memory[5];
+	//var out = memory[5];
+	//return out;
 
 }
 
@@ -134,10 +152,10 @@ function xor_circuit_with_feedback(in_a, in_b){
 }
 
 console.log('xor_circuit with queue system');
-console.log(xor_circuit(0, 0));
-console.log(xor_circuit(0, 1));
-console.log(xor_circuit(1, 0));
-console.log(xor_circuit(1, 1));
+xor_circuit(0, 0);
+xor_circuit(0, 1);
+xor_circuit(1, 0);
+xor_circuit(1, 1);
 
 //console.log(xor_circuit_with_feedback(1, 1));
 
