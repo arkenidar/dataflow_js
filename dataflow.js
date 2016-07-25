@@ -5,30 +5,60 @@ function nand_operation(a, b){
 	return c;
 }
 
-function circuit(in_a, in_b){
+function xor_circuit(in_a, in_b){
 
-	memory=[0, 0, 0];
+	memory=[0, 0, 0, 0, 0, 0];
 	memory[0]=in_a; memory[1]=in_b;
-	operations=[[1], [2], []];
-	queue=[0];
-
+	
+	var nands_table=[
+		[0,2,3], // acd
+		[0,1,2], // abc
+		[3,4,5], // deq
+		[2,1,4], // cbe
+		[5,5,1], // qqb (special)
+	];
+	function get_nands_having_source(source){
+		var nands_by_source = [
+			[0,1],
+			[1,3],
+			[0,3],
+			[2],
+			[2],
+			[],
+		];
+		return nands_by_source[source];
+	}
+	//queue=[0];
+	process_queue([0]);
+	process_queue([1]);
+	
+	function process_queue(queue){
+	
 	view('queue');
 	while(true){
 		// get source from queue
 		source=queue.shift();
 		if(typeof source=='undefined') break; // exits on empty queue
 
-		// get destination
-		destinations=operations[source];
-		view('destinations');
+		// get nands
+		nands=get_nands_having_source(source);
+		view('nands');
 		
-		destinations.forEach(function(destination) { // for each destination
+		nands.forEach(function(nand_index) { // for each nand
+			var nand = nands_table[nand_index];
+			var source1 = nand[0];
+			var source2 = nand[1];
+			var destination = nand[2];
+			
 			view('destination', destination);
 
 			view('memory');
 			destination_before=memory[destination];
 			// operation from source to destination
-			memory[destination]=nand_operation(memory[destination], memory[source]);
+			
+			//memory[destination]=nand_operation(memory[destination], memory[source]);
+			memory[destination]=nand_operation(memory[source1], memory[source2]);
+			
 			destination_after=memory[destination];
 
 			if(destination_after!=destination_before) // mutation event
@@ -38,7 +68,10 @@ function circuit(in_a, in_b){
 		view('queue');
 	}
 	view('memory');
-	return memory[2];
+	}
+	
+	
+	return memory[5];
 
 }
 
@@ -100,13 +133,13 @@ function xor_circuit_with_feedback(in_a, in_b){
 	//return q;
 }
 
-/*
+console.log('xor_circuit with queue system');
 console.log(xor_circuit(0, 0));
 console.log(xor_circuit(0, 1));
 console.log(xor_circuit(1, 0));
 console.log(xor_circuit(1, 1));
-*/
-console.log(xor_circuit_with_feedback(1, 1));
+
+//console.log(xor_circuit_with_feedback(1, 1));
 
 function view(var_name, var_value=''){
 	if([].indexOf(var_name)!=-1){
