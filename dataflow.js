@@ -11,8 +11,12 @@ var gate_queue = [];
 
 function xor_circuit(in_a, in_b){
 
-	memory=[0, 0, 0, 0, 0, 0];
+	memory=new Array(6); // 6 undefined elements
+	for(var i=0; i<memory.length; i++)
+		memory[i]=9;
 	memory[0]=in_a; memory[1]=in_b;
+
+	p(memory);
 	
 	var gate_table=[
 		[0,2,3],	// 0 acd (nand gate)
@@ -104,32 +108,38 @@ function xor_circuit(in_a, in_b){
 		}
 
 		// get gates
-		gates=get_gates_having_source(gate);
-		view('gates');
+		//gates=get_gates_having_source(gate);
+		//p('gates from source: '+gate+ ' gates: '+gates);
 		
-		gates.forEach(function(gate_index) { // for each: gate
+		process_gate = function(gate_index) { // for each: gate
+			p("gate index: "+ gate_index);
 			var gate = gate_table[gate_index];
-			destination_before=memory[destination];
+			p("gate wiring: "+ gate);
+			//destination_before=memory[destination];
 			if(gate.length==2){
 				var source = gate[0];
 				var destination = gate[1];
+				destination_before=memory[destination];
 				memory[destination] = memory[source];
 			}else if(gate.length==3){
 				var source1 = gate[0];
 				var source2 = gate[1];
 				var destination = gate[2];
+				destination_before=memory[destination];
 				memory[destination]=nand_operation(memory[source1], memory[source2]);
 			}
-			destination_after=memory[destination];
+			var destination_after=memory[destination];
 
 			if(destination==5) console.log("out from if: " + memory[destination]);
 			
-			if(destination_after!=destination_before) // mutation event
+			if(destination_after!==destination_before) // mutation event
 				// add destination to queue (as new source) on mutation event
 				//queue.push(destination);
-				gate_queue.concat(get_gates_having_source(source));
+				var sourced_gates = get_gates_having_source(destination);
+				gate_queue=gate_queue.concat(sourced_gates);
 			
-		}); // end of: for each: gate
+		}; // end of: process_gate
+		process_gate(gate);
 		
 		view('gate_queue', gate_queue);
 	}
