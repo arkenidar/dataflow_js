@@ -7,9 +7,10 @@ function nand_operation(a, b){
 	return c;
 }
 
+var gate_queue = [];
+
 function xor_circuit(in_a, in_b){
 
-	var queue = [];
 	memory=[0, 0, 0, 0, 0, 0];
 	memory[0]=in_a; memory[1]=in_b;
 	
@@ -32,6 +33,8 @@ function xor_circuit(in_a, in_b){
 		return gates_by_source[source];
 	}
 	//queue=[0];
+	
+	/*
 	process_queue([0]);
 	process_queue([1]);
 	for(var i=0; i<5; i++){
@@ -40,6 +43,7 @@ function xor_circuit(in_a, in_b){
 		process_queue([1]);
 	}
 	console.log(memory[5]);
+	*/
 	
 	/*
 	var gate_q = [
@@ -47,14 +51,19 @@ function xor_circuit(in_a, in_b){
 		['q', [1] ], // queue B
 		//
 		['o', [5] ], // out Q
-		['q', [4] ], // queue Q
+		['q', [1] ], // queue B
 		['o', [5] ], // out Q
-		['q', [4] ], // queue Q
+		['q', [1] ], // queue B
 		['o', [5] ], // out Q
 		//
 	];
+	*/
+	/*
+	var gate_list = [
+		['q', [2] ], // queue gate 2
+	];
 	
-	var commands = gate_q;
+	var commands = gate_list;
 	
 	commands.forEach(function(command){
 		var command_type = command[0];
@@ -64,27 +73,38 @@ function xor_circuit(in_a, in_b){
 		}
 		else if(command_type=='o'){
 			param1.forEach(function(address){
-				console.log(memory[address]);
+				p("out command: " + memory[address]);
 			});
 		}
 	});
 	*/
-	
-	
-	function process_queue(queue){
+
+	process_queue();
+
+	function process_queue(queue_param){
 	//queue.concat(queue_param);
+	//input_queue=[0];
+	gate_queue=[1];
 	
-	view('queue');
+	view('gate_queue', gate_queue);
 	while(true){
+		/*
 		// get source from queue
 		source=queue.shift();
 		if(typeof source=='undefined'){
 			queue = [];
 			break; // exits on empty queue
 		}
+		*/
 		
+		gate=gate_queue.shift();
+		if(typeof gate=='undefined'){
+			gate_queue = [];
+			break; // exits on empty queue
+		}
+
 		// get gates
-		gates=get_gates_having_source(source);
+		gates=get_gates_having_source(gate);
 		view('gates');
 		
 		gates.forEach(function(gate_index) { // for each: gate
@@ -102,20 +122,24 @@ function xor_circuit(in_a, in_b){
 			}
 			destination_after=memory[destination];
 
-			//if(destination==5) console.log("out: " + memory[destination]);
+			if(destination==5) console.log("out from if: " + memory[destination]);
 			
 			if(destination_after!=destination_before) // mutation event
 				// add destination to queue (as new source) on mutation event
-				queue.push(destination);
+				//queue.push(destination);
+				gate_queue.concat(get_gates_having_source(source));
 			
 		}); // end of: for each: gate
 		
-		view('queue');
+		view('gate_queue', gate_queue);
 	}
 	view('memory');
 	}
 	
 	var out = memory[5];
+	
+	memory[1] = out; // B <= Q
+	
 	return out;
 
 }
@@ -190,8 +214,8 @@ p('xor_circuit with feedback implemented with queue system' );
 xor_circuit(1, 0);
 
 function view(var_name, var_value=''){
-	if([].indexOf(var_name)!=-1){
-		console.log(var_name+': '+
+	if(true || ['queue'].indexOf(var_name)!=-1){
+		p(var_name+': '+
 			(var_value===''?global[var_name]:var_value)
 		);
 	}
