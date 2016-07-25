@@ -1,3 +1,5 @@
+var p = console.log;
+
 // dataflow_js (reactive dataflow nand operation queue)
 // a way of processing data which uses simple primitives
 function nand_operation(a, b){
@@ -7,89 +9,114 @@ function nand_operation(a, b){
 
 function xor_circuit(in_a, in_b){
 
+	var queue = [];
 	memory=[0, 0, 0, 0, 0, 0];
 	memory[0]=in_a; memory[1]=in_b;
 	
-	var nands_table=[
-		[0,2,3], // acd
-		[0,1,2], // abc
-		[3,4,5], // deq
-		[2,1,4], // cbe
-		[5,5,1], // qqb (special)
+	var gate_table=[
+		[0,2,3],	// 0 acd (nand gate)
+		[0,1,2],	// 1 abc (nand gate)
+		[3,4,5],	// 2 deq (nand gate)
+		[2,1,4],	// 3 cbe (nand gate)
+		[5,1],	// 4 qb (buffer gate)
 	];
-	function get_nands_having_source(source){
-		var nands_by_source = [
-			[0,1],
-			[1,3],
-			[0,3],
-			[2],
-			[2],
-			[],
+	function get_gates_having_source(source){
+		var gates_by_source = [
+			[0,1],	// 0
+			[1,3],	// 1
+			[0,3],	// 2
+			[2],		// 3
+			[2],		// 4
+			[/*4*/],		// 5
 		];
-		return nands_by_source[source];
+		return gates_by_source[source];
 	}
 	//queue=[0];
-	//process_queue([0]);
-	//process_queue([1]);
+	process_queue([0]);
+	process_queue([1]);
+	for(var i=0; i<5; i++){
+		console.log(memory[5]);
+		memory[1]=memory[5];
+		process_queue([1]);
+	}
+	console.log(memory[5]);
+	
+	/*
 	var gate_q = [
-	['q', [0] ], // queue
-	['q', [1] ], // queue
-	['o', [5] ], // out
+		['q', [0] ], // queue A
+		['q', [1] ], // queue B
+		//
+		['o', [5] ], // out Q
+		['q', [4] ], // queue Q
+		['o', [5] ], // out Q
+		['q', [4] ], // queue Q
+		['o', [5] ], // out Q
+		//
 	];
 	
-	processes = gate_q;
+	var commands = gate_q;
 	
-	processes.forEach(function(process){
-		var command = process[0];
-		var params = process[1];
-		if(command=='q')
-			process_queue(params);
-		else if(command=='o')
-			params.forEach(function(address){
+	commands.forEach(function(command){
+		var command_type = command[0];
+		var param1 = command[1];
+		if(command_type=='q'){
+			process_queue(param1);
+		}
+		else if(command_type=='o'){
+			param1.forEach(function(address){
 				console.log(memory[address]);
 			});
+		}
 	});
+	*/
+	
 	
 	function process_queue(queue){
+	//queue.concat(queue_param);
 	
 	view('queue');
 	while(true){
 		// get source from queue
 		source=queue.shift();
-		if(typeof source=='undefined') break; // exits on empty queue
-
-		// get nands
-		nands=get_nands_having_source(source);
-		view('nands');
+		if(typeof source=='undefined'){
+			queue = [];
+			break; // exits on empty queue
+		}
 		
-		nands.forEach(function(nand_index) { // for each nand
-			var nand = nands_table[nand_index];
-			var source1 = nand[0];
-			var source2 = nand[1];
-			var destination = nand[2];
-			
-			view('destination', destination);
-
-			view('memory');
+		// get gates
+		gates=get_gates_having_source(source);
+		view('gates');
+		
+		gates.forEach(function(gate_index) { // for each: gate
+			var gate = gate_table[gate_index];
 			destination_before=memory[destination];
-			// operation from source to destination
-			
-			//memory[destination]=nand_operation(memory[destination], memory[source]);
-			memory[destination]=nand_operation(memory[source1], memory[source2]);
-			
+			if(gate.length==2){
+				var source = gate[0];
+				var destination = gate[1];
+				memory[destination] = memory[source];
+			}else if(gate.length==3){
+				var source1 = gate[0];
+				var source2 = gate[1];
+				var destination = gate[2];
+				memory[destination]=nand_operation(memory[source1], memory[source2]);
+			}
 			destination_after=memory[destination];
 
+			//if(destination==5) console.log("out: " + memory[destination]);
+			
 			if(destination_after!=destination_before) // mutation event
 				// add destination to queue (as new source) on mutation event
 				queue.push(destination);
-		});
+			
+		}); // end of: for each: gate
+		
 		view('queue');
 	}
 	view('memory');
 	}
 	
-	//var out = memory[5];
-	//return out;
+	var out = memory[5];
+	return out;
 
 }
 
@@ -151,13 +178,16 @@ function xor_circuit_with_feedback(in_a, in_b){
 	//return q;
 }
 
-console.log('xor_circuit with queue system');
-xor_circuit(0, 0);
-xor_circuit(0, 1);
-xor_circuit(1, 0);
-xor_circuit(1, 1);
+/*
+p('xor_circuit implemented with queue system');
+p(xor_circuit(0, 0));
+p(xor_circuit(0, 1));
+p(xor_circuit(1, 0));
+p(xor_circuit(1, 1));
+*/
 
-//console.log(xor_circuit_with_feedback(1, 1));
+p('xor_circuit with feedback implemented with queue system' );
+xor_circuit(1, 0);
 
 function view(var_name, var_value=''){
 	if([].indexOf(var_name)!=-1){
